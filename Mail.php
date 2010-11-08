@@ -65,6 +65,8 @@ class Mail extends CApplicationComponent
 	* @var string the path to the location where mail views are stored.  Defaults to 'application.views.mail'
 	*/
 	public $viewPath = 'application.views.mail';
+
+  public $layout = 'mail';
 	
 	/**
 	* @var string options specific to the transport type being used.
@@ -92,7 +94,7 @@ class Mail extends CApplicationComponent
     * @var mixed Holds the SwiftMailer mailer
     */
     protected $mailer;
-    
+    protected $logger;
     private static $registeredScripts=false;
     
     /**
@@ -126,7 +128,9 @@ class Mail extends CApplicationComponent
 		if ($this->debug===true) {
 			return $this->debug($message);
 		}
-		return $this->getMailer()->send($message->message, $failedRecipients);
+		$result = $this->getMailer()->send($message->message, $failedRecipients);
+    Yii::trace($this->logger->dump());
+    return $result;
 	}
     
 	/**
@@ -155,7 +159,9 @@ class Mail extends CApplicationComponent
 		if ($this->debug===true) {
 			return $this->debug($message);
 		}
-		return $this->getMailer()->batchSend($message->message, $failedRecipients, $it);
+		$result = $this->getMailer()->batchSend($message->message, $failedRecipients, $it);
+    Yii::trace($this->logger->dump());
+    return $result;
 	}
 	
 	/**
@@ -176,8 +182,10 @@ class Mail extends CApplicationComponent
  		if ($this->debug===true) {
 			return $this->debug($message);
 		}
-        return $this->getMailer()->send($message);
-    }
+    $result = $this->getMailer()->send($message);
+    Yii::trace($this->logger->dump());
+    return $result;
+  }
     
     /**
     * This method is called internally instead of sending a message when debug mode it on.
@@ -219,9 +227,11 @@ class Mail extends CApplicationComponent
 	* @return Swift_Mailer
 	*/
 	public function getMailer() {
-		if ($this->mailer===null)
+		if ($this->mailer===null) {
 			$this->mailer = Swift_Mailer::newInstance($this->getTransport());
-			
+      $this->logger = new Swift_Plugins_Loggers_ArrayLogger();
+      $this->mailer->registerPlugin(new Swift_Plugins_LoggerPlugin($this->logger));
+    }
 		return $this->mailer;
 	}
 	
