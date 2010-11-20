@@ -1,4 +1,7 @@
 <?php
+
+Yii::import('ext.mail.Message');
+
 /**
  * Mail class file.
  *

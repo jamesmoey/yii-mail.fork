@@ -112,14 +112,19 @@ class Message extends CComponent {
 		if ($this->view !== null) {
 			if (!is_array($body))
 				$body = array('body'=>$body);
+      if (strpos($this->view, '.') !== false || strpos($this->view, '/') !== false) {
+        $view = $this->view;
+      } else {
+        $view = Yii::app()->mail->viewPath.'.'.$this->view;
+      }
       if (Yii::app()->controller->getLayoutFile(Yii::app()->mail->layout) !== false) {
         $oldLayout = Yii::app()->controller->layout;
         Yii::app()->controller->layout = Yii::app()->mail->layout;
-        $body = Yii::app()->controller->render(Yii::app()->mail->viewPath.'.'.$this->view, array_merge($body, array('mail'=>$this)), true);
+        $body = Yii::app()->controller->render($view, array_merge($body, array('mail'=>$this)), true);
         Yii::trace("Mail Body: " . $body);
         Yii::app()->controller->layout = $oldLayout;
       } else {
-			  $body = Yii::app()->controller->renderPartial(Yii::app()->mail->viewPath.'.'.$this->view, array_merge($body, array('mail'=>$this)), true);
+			  $body = Yii::app()->controller->renderPartial($view, array_merge($body, array('mail'=>$this)), true);
       }
 		}
 		return $this->message->setBody($body, $contentType, $charset);
