@@ -112,7 +112,7 @@ class Message extends CComponent {
 		if ($this->view !== null) {
 			if (!is_array($body))
 				$body = array('body'=>$body);
-      if (strpos($this->view, '.') !== false || strpos($this->view, '/') !== false) {
+      if (strpos($this->view, '/') !== false) {
         $view = $this->view;
       } else {
         $view = Yii::app()->mail->viewPath.'.'.$this->view;
