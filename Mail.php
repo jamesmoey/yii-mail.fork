@@ -185,7 +185,7 @@ class Mail extends CApplicationComponent
  		if ($this->debug===true) {
 			return $this->debug($message);
 		}
-    $result = $this->getMailer()->send($message);
+    $result = $this->getMailer()->send($message->message);
     Yii::trace($this->logger->dump());
     return $result;
   }
@@ -218,7 +218,13 @@ class Mail extends CApplicationComponent
     				$this->transport = Swift_SmtpTransport::newInstance();
     				foreach ($this->transportOptions as $option => $value)
     					$this->transport->{'set'.ucfirst($option)}($value); //sets option with the setter method
-    				break;    			
+    				break;
+          case 'postmark':
+            Yii::import('ext.mail.postmark.SwiftPostmarkTransport');
+            $this->transport = SwiftPostmarkTransport::newInstance();
+            foreach ($this->transportOptions as $option => $value)
+              $this->transport->{'set'.ucfirst($option)}($value); //sets option with the setter method
+            break;
 			}
 		}
     	

@@ -117,16 +117,32 @@ class Message extends CComponent {
       } else {
         $view = Yii::app()->mail->viewPath.'.'.$this->view;
       }
-      if (Yii::app()->controller->getLayoutFile(Yii::app()->mail->layout) !== false) {
-        $oldLayout = Yii::app()->controller->layout;
-        Yii::app()->controller->layout = Yii::app()->mail->layout;
-        $body = Yii::app()->controller->render($view, array_merge($body, array('mail'=>$this)), true);
-        Yii::trace("Mail Body: " . $body);
-        Yii::app()->controller->layout = $oldLayout;
-      } else {
-			  $body = Yii::app()->controller->renderPartial($view, array_merge($body, array('mail'=>$this)), true);
+      $body = $this->renderInternal(Yii::getPathOfAlias($view).'.php', array_merge($body, array('mail'=>$this)), true);
+      $layout = Yii::app()->mail->layout;
+      if (stripos(Yii::app()->mail->layout, '.') === false) $layout = 'application.views.layouts.' . $layout;
+      $layoutPath = Yii::getPathOfAlias($layout);
+      if ($layoutPath!==false) {
+        $body = $this->renderInternal($layoutPath.'.php', array_merge(array('content'=>$body), array('mail'=>$this)), true);
       }
+      Yii::trace("Mail Body: " . $body);
 		}
 		return $this->message->setBody($body, $contentType, $charset);
 	}
+
+  protected function renderInternal($_viewFile_, $variable=array(), $_return_=false) {
+    // we use special variable names here to avoid conflict when extracting data
+    if(is_array($variable))
+      extract($variable,EXTR_PREFIX_SAME,'data');
+    else
+      $data=$variable;
+    if($_return_)
+    {
+      ob_start();
+      ob_implicit_flush(false);
+      require($_viewFile_);
+      return ob_get_clean();
+    }
+    else
+      require($_viewFile_);
+  }
 }
