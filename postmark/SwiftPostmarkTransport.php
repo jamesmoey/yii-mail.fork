@@ -102,7 +102,7 @@ class SwiftPostmarkTransport implements Swift_Transport {
       } else {
         if ($part instanceof Swift_Mime_Attachment) {
           $data['Attachments'][] = array(
-            'Name'=>$part->getId(),
+            'Name'=>$part->getFilename(),
             'Content'=>base64_encode($part->getBody()),
             'ContentType'=>$part->getContentType(),
           );
