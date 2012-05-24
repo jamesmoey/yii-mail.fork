@@ -52,6 +52,12 @@ Yii::import('ext.mail.Message');
  */
 class Mail extends CApplicationComponent
 {
+  /**
+   * @var string Override the recipient email address in the message. Useful in testing environment. Defaults to null.
+   * Setting this variable will remove Bcc, CC and original To from the message.
+   */
+  public $overrideRecipientEmailAddress = null;
+
 	/**
 	* @var bool whether to send mail in debug mode.  When in debug mode, emails will not actually send but
 	* will be flashed instead with CWebUser::setFlash().  Defaults to false
@@ -122,7 +128,7 @@ class Mail extends CApplicationComponent
 	* The return value is the number of recipients who were accepted for
 	* delivery.
 	* 
-	* @param Message $message
+	* @param Swift_Message $message
 	* @param array &$failedRecipients, optional
 	* @return int
 	* @see batchSend()
@@ -131,6 +137,11 @@ class Mail extends CApplicationComponent
 		if ($this->debug===true) {
 			return $this->debug($message);
 		}
+    if (isset($this->overrideRecipientEmailAddress)) {
+      $message->setTo($this->overrideRecipientEmailAddress);
+      $message->setCc(array());
+      $message->setBcc(array());
+    }
 		$result = $this->getMailer()->send($message->message, $failedRecipients);
     Yii::trace($this->logger->dump());
     return $result;
@@ -162,6 +173,11 @@ class Mail extends CApplicationComponent
 		if ($this->debug===true) {
 			return $this->debug($message);
 		}
+    if (isset($this->overrideRecipientEmailAddress)) {
+      $message->setTo($this->overrideRecipientEmailAddress);
+      $message->setCc(array());
+      $message->setBcc(array());
+    }
 		$result = $this->getMailer()->batchSend($message->message, $failedRecipients, $it);
     Yii::trace($this->logger->dump());
     return $result;
@@ -185,6 +201,11 @@ class Mail extends CApplicationComponent
  		if ($this->debug===true) {
 			return $this->debug($message);
 		}
+    if (isset($this->overrideRecipientEmailAddress)) {
+      $message->setTo($this->overrideRecipientEmailAddress);
+      $message->setCc(array());
+      $message->setBcc(array());
+    }
     $result = $this->getMailer()->send($message->message);
     Yii::trace($this->logger->dump());
     return $result;
